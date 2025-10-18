@@ -1,272 +1,634 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>จองคิว Pet Grooming</title>
-  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Kanit', 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    .header { text-align: center; margin-bottom: 30px; }
-    .header h1 { color: #667eea; font-size: 28px; margin-bottom: 10px; }
-    .header p { color: #666; font-size: 14px; }
-    .user-info {
-      background: #f5f5f5; padding: 15px;
-      border-radius: 10px; margin-bottom: 20px;
-    }
-    .user-info p { margin: 5px 0; color: #333; font-size: 14px; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label {
-      display: block; color: #333; font-weight: 600;
-      margin-bottom: 8px; font-size: 14px;
-    }
-    .form-group input, .form-group select {
-      width: 100%; padding: 12px 15px;
-      border: 2px solid #e0e0e0; border-radius: 10px;
-      font-size: 16px; transition: all 0.3s;
-      font-family: inherit;
-    }
-    .form-group input:focus, .form-group select:focus {
-      outline: none; border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    .service-options { display: grid; gap: 10px; }
-    .service-option {
-      display: flex; align-items: center;
-      padding: 12px; border: 2px solid #e0e0e0;
-      border-radius: 10px; cursor: pointer;
-      transition: all 0.3s;
-    }
-    .service-option:hover { border-color: #667eea; background: #f8f9ff; }
-    .service-option input[type="checkbox"] {
-      width: 20px; height: 20px; margin-right: 10px;
-    }
-    .service-option label { flex: 1; cursor: pointer; font-weight: normal; margin: 0; }
-    .service-price { color: #667eea; font-weight: 600; }
-    .total-price {
-      background: #667eea; color: white;
-      padding: 15px; border-radius: 10px;
-      text-align: center; margin: 20px 0;
-      font-size: 20px; font-weight: 600;
-    }
-    .submit-btn {
-      width: 100%; padding: 15px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; border: none; border-radius: 10px;
-      font-size: 18px; font-weight: 600; cursor: pointer;
-      transition: all 0.3s; margin-top: 10px;
-    }
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    }
-    .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
-    .loading { display: none; text-align: center; padding: 20px; }
-    .loading.active { display: block; }
-    .success-message { display: none; text-align: center; padding: 30px; }
-    .success-message.active { display: block; }
-    .success-message h2 { color: #4CAF50; margin-bottom: 15px; }
-    .icon { font-size: 60px; margin-bottom: 20px; }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>📅 จองคิว</h1>
-      <p>Pet Grooming Shop</p>
-    </div>
-
-    <div class="user-info" id="userInfo">
-      <p><strong>ลูกค้า:</strong> <span id="customerName">กำลังโหลด...</span></p>
-      <p><strong>น้อง:</strong> <span id="petName">ไม่ระบุ</span></p>
-    </div>
-
-    <form id="bookingForm">
-      <div class="form-group">
-        <label>เลือกบริการ *</label>
-        <div class="service-options">
-          <div class="service-option">
-            <input type="checkbox" id="service1" name="services" value="อาบน้ำ" data-price="119">
-            <label for="service1">อาบน้ำ <span class="service-price">119 บาท</span></label>
-          </div>
-          <div class="service-option">
-            <input type="checkbox" id="service2" name="services" value="ตัดขน" data-price="200">
-            <label for="service2">ตัดขน <span class="service-price">200 บาท</span></label>
-          </div>
-          <div class="service-option">
-            <input type="checkbox" id="service3" name="services" value="ตัดเล็บ" data-price="50">
-            <label for="service3">ตัดเล็บ <span class="service-price">50 บาท</span></label>
-          </div>
-          <div class="service-option">
-            <input type="checkbox" id="service4" name="services" value="เช็ดหู" data-price="30">
-            <label for="service4">เช็ดหู <span class="service-price">30 บาท</span></label>
-          </div>
-          <div class="service-option">
-            <input type="checkbox" id="service5" name="services" value="หยอดเห็บหมัด" data-price="100">
-            <label for="service5">หยอดเห็บหมัด <span class="service-price">100 บาท</span></label>
-          </div>
-        </div>
-      </div>
-
-      <div class="total-price" id="totalPrice">ยอดรวม: 0 บาท</div>
-
-      <div class="form-group">
-        <label>เลือกวันที่ *</label>
-        <input type="date" id="bookingDate" required min="">
-      </div>
-
-      <div class="form-group">
-        <label>เลือกเวลา *</label>
-        <select id="bookingTime" required>
-          <option value="">-- เลือกเวลา --</option>
-          <option value="09:00">09:00 น.</option>
-          <option value="10:00">10:00 น.</option>
-          <option value="11:00">11:00 น.</option>
-          <option value="12:00">12:00 น.</option>
-          <option value="13:00">13:00 น.</option>
-          <option value="14:00">14:00 น.</option>
-          <option value="15:00">15:00 น.</option>
-          <option value="16:00">16:00 น.</option>
-          <option value="17:00">17:00 น.</option>
-        </select>
-      </div>
-
-      <button type="submit" class="submit-btn">ยืนยันการจอง</button>
-    </form>
-
-    <div class="loading" id="loading">
-      <div class="icon">⏳</div>
-      <h3>กำลังจองคิว...</h3>
-    </div>
-
-    <div class="success-message" id="successMessage">
-      <div class="icon">✅</div>
-      <h2>จองคิวสำเร็จ!</h2>
-      <p id="bookingDetails"></p>
-    </div>
-  </div>
-
-  <!-- ✅ JavaScript อยู่ใน <script> ก่อน </body> -->
-  <script>
-    const LIFF_ID = '2008313526-gxZrdbMx';
-    const WEBHOOK_URL = 'https://hook.eu2.make.com/hb9yz1fe5b4ldte2zoy2kakrcrmq3z8o';
-
-    let lineUserId = '';
-    let displayName = '';
-
-    // ตั้งค่าวันที่ขั้นต่ำ
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('bookingDate').min = today;
-
-    // เริ่มต้น LIFF
-    window.onload = function() {
-      liff.init({ liffId: LIFF_ID })
-        .then(() => {
-          if (liff.isLoggedIn()) {
-            liff.getProfile().then(profile => {
-              lineUserId = profile.userId;
-              displayName = profile.displayName;
-              document.getElementById('customerName').textContent = displayName;
-            });
-          } else {
-            liff.login();
-          }
-        })
-        .catch(err => {
-          console.error('LIFF init failed:', err);
-          alert('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
-        });
-    };
-
-    // คำนวณยอดรวมอัตโนมัติ
-    const serviceCheckboxes = document.querySelectorAll('input[name="services"]');
-    const totalPriceEl = document.getElementById('totalPrice');
-    serviceCheckboxes.forEach(cb => {
-      cb.addEventListener('change', () => {
-        let total = 0;
-        serviceCheckboxes.forEach(x => { if (x.checked) total += parseInt(x.dataset.price); });
-        totalPriceEl.textContent = `ยอดรวม: ${total} บาท`;
-      });
-    });
-
-    // ส่งข้อมูลไป Make.com
-    document.getElementById('bookingForm').addEventListener('submit', async e => {
-      e.preventDefault();
-
-      const selectedServices = Array.from(serviceCheckboxes)
-        .filter(x => x.checked)
-        .map(x => x.value);
-
-      if (selectedServices.length === 0) {
-        alert('กรุณาเลือกบริการอย่างน้อย 1 รายการ');
-        return;
-      }
-
-      const bookingDate = document.getElementById('bookingDate').value;
-      const bookingTime = document.getElementById('bookingTime').value;
-      if (!bookingDate || !bookingTime) {
-        alert('กรุณาเลือกวันที่และเวลา');
-        return;
-      }
-
-      const totalPrice = totalPriceEl.textContent.replace('ยอดรวม: ', '').replace(' บาท', '');
-
-      const data = {
-        line_user_id: lineUserId,
-        display_name: displayName,
-        services: selectedServices.join(', '),
-        booking_date: bookingDate,
-        booking_time: bookingTime,
-        total_price: totalPrice
-      };
-
-      document.getElementById('loading').classList.add('active');
-
-      try {
-        const res = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-
-        document.getElementById('loading').classList.remove('active');
-
-        if (res.ok) {
-          document.getElementById('bookingForm').style.display = 'none';
-          document.getElementById('successMessage').classList.add('active');
-          document.getElementById('bookingDetails').textContent =
-            `คุณเลือกบริการ: ${selectedServices.join(', ')} วันที่ ${bookingDate} เวลา ${bookingTime}`;
-
-          // ส่งข้อความกลับไปที่ LINE
-          if (liff.isInClient()) {
-            liff.sendMessages([
-              { type: 'text', text: 🎉 จองคิวสำเร็จ!\n${displayName}\nบริการ: ${selectedServices.join(', ')}\nวันที่ ${bookingDate}\nเวลา ${bookingTime} }
-            ]);
-          }
-        } else {
-          alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จองคิว Pet Grooming</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Kanit', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .user-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .user-info p {
+            margin: 5px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .service-accordion {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .service-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .service-item.active {
+            border-color: #667eea;
+        }
+        
+        .service-header {
+            padding: 15px;
+            background: #f8f9ff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .service-header:hover {
+            background: #e8e9ff;
+        }
+        
+        .service-header.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .service-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .service-arrow {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .service-arrow.rotated {
+            transform: rotate(180deg);
+        }
+        
+        .service-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .service-content.open {
+            max-height: 500px;
+        }
+        
+        .size-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 15px;
+        }
+        
+        .size-option {
+            position: relative;
+        }
+        
+        .size-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .size-label {
+            display: block;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .size-label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .size-option input[type="radio"]:checked + .size-label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .size-name {
+            font-weight: 600;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .size-price {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .simple-service {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .simple-service:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .simple-service input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        .simple-service label {
+            flex: 1;
+            cursor: pointer;
+            font-weight: normal !important;
+            margin: 0 !important;
+        }
+        
+        .service-price {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .total-price {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .success-message.active {
+            display: block;
+        }
+        
+        .success-message h2 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 จองคิว</h1>
+            <p>Pet Grooming Shop</p>
+        </div>
+        
+        <div class="user-info" id="userInfo">
+            <p><strong>ลูกค้า:</strong> <span id="customerName">กำลังโหลด...</span></p>
+            <p><strong>น้อง:</strong> <span id="petName">กำลังโหลด...</span></p>
+        </div>
+        
+        <form id="bookingForm">
+            <div class="form-group">
+                <label>เลือกบริการ *</label>
+                <div class="service-accordion">
+                    <!-- อาบน้ำ -->
+                    <div class="service-item" data-service="bath">
+                        <div class="service-header" onclick="toggleService('bath')">
+                            <span class="service-title">🛁 อาบน้ำ</span>
+                            <span class="service-arrow">▼</span>
+                        </div>
+                        <div class="service-content" id="bath-content">
+                            <div class="size-options">
+                                <div class="size-option">
+                                    <input type="radio" id="bath-s" name="bath" value="อาบน้ำ-S" data-price="300">
+                                    <label for="bath-s" class="size-label">
+                                        <span class="size-name">S</span>
+                                        <span class="size-price">300 บาท</span>
+                                    </label>
+                                </div>
+                                <div class="size-option">
+                                    <input type="radio" id="bath-m" name="bath" value="อาบน้ำ-M" data-price="500">
+                                    <label for="bath-m" class="size-label">
+                                        <span class="size-name">M</span>
+                                        <span class="size-price">500 บาท</span>
+                                    </label>
+                                </div>
+                                <div class="size-option">
+                                    <input type="radio" id="bath-l" name="bath" value="อาบน้ำ-L" data-price="800">
+                                    <label for="bath-l" class="size-label">
+                                        <span class="size-name">L</span>
+                                        <span class="size-price">800 บาท</span>
+                                    </label>
+                                </div>
+                                <div class="size-option">
+                                    <input type="radio" id="bath-xl" name="bath" value="อาบน้ำ-XL" data-price="1000">
+                                    <label for="bath-xl" class="size-label">
+                                        <span class="size-name">XL</span>
+                                        <span class="size-price">1000 บาท</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ตัดขน -->
+                    <div class="service-item" data-service="haircut">
+                        <div class="service-header" onclick="toggleService('haircut')">
+                            <span class="service-title">✂️ ตัดขน</span>
+                            <span class="service-arrow">▼</span>
+                        </div>
+                        <div class="service-content" id="haircut-content">
+                            <div class="size-options">
+                                <div class="size-option">
+                                    <input type="radio" id="haircut-s" name="haircut" value="ตัดขน-S" data-price="400">
+                                    <label for="haircut-s" class="size-label">
+                                        <span class="size-name">S</span>
+                                        <span class="size-price">400 บาท</span>
+                                    </label>
+                                </div>
+                                <div class="size-option">
+                                    <input type="radio" id="haircut-m" name="haircut" value="ตัดขน-M" data-price="400">
+                                    <label for="haircut-m" class="size-label">
+                                        <span class="size-name">M</span>
+                                        <span class="size-price">400 บาท</span>
+                                    </label>
+                                </div>
+                                <div class="size-option">
+                                    <input type="radio" id="haircut-l" name="haircut" value="ตัดขน-L" data-price="600">
+                                    <label for="haircut-l" class="size-label">
+                                        <span class="size-name">L</span>
+                                        <span class="size-price">600 บาท</span>
+                                    </label>
+                                </div>
+                                <div class="size-option">
+                                    <input type="radio" id="haircut-xl" name="haircut" value="ตัดขน-XL" data-price="600">
+                                    <label for="haircut-xl" class="size-label">
+                                        <span class="size-name">XL</span>
+                                        <span class="size-price">600 บาท</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ตัดเล็บ -->
+                    <div class="simple-service">
+                        <input type="checkbox" id="service-nail" name="simple-services" value="ตัดเล็บ" data-price="50">
+                        <label for="service-nail">
+                            ตัดเล็บ <span class="service-price">50 บาท</span>
+                        </label>
+                    </div>
+                    
+                    <!-- เช็ดหู -->
+                    <div class="simple-service">
+                        <input type="checkbox" id="service-ear" name="simple-services" value="เช็ดหู" data-price="30">
+                        <label for="service-ear">
+                            เช็ดหู <span class="service-price">30 บาท</span>
+                        </label>
+                    </div>
+                    
+                    <!-- หยอดเห็บหมัด -->
+                    <div class="simple-service">
+                        <input type="checkbox" id="service-flea" name="simple-services" value="หยอดเห็บหมัด" data-price="100">
+                        <label for="service-flea">
+                            หยอดเห็บหมัด <span class="service-price">100 บาท</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="total-price" id="totalPrice">
+                ยอดรวม: 0 บาท
+            </div>
+            
+            <div class="form-group">
+                <label>เลือกวันที่ *</label>
+                <input type="date" id="bookingDate" required min="">
+            </div>
+            
+            <div class="form-group">
+                <label>เลือกเวลา *</label>
+                <select id="bookingTime" required>
+                    <option value="">-- เลือกเวลา --</option>
+                    <option value="09:00">09:00 น.</option>
+                    <option value="10:00">10:00 น.</option>
+                    <option value="11:00">11:00 น.</option>
+                    <option value="12:00">12:00 น.</option>
+                    <option value="13:00">13:00 น.</option>
+                    <option value="14:00">14:00 น.</option>
+                    <option value="15:00">15:00 น.</option>
+                    <option value="16:00">16:00 น.</option>
+                    <option value="17:00">17:00 น.</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">ยืนยันการจอง</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="icon">⏳</div>
+            <h3>กำลังจองคิว...</h3>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <div class="icon">✅</div>
+            <h2>จองคิวสำเร็จ!</h2>
+            <p id="bookingDetails"></p>
+        </div>
+    </div>
 
-      } catch (err) {
-        console.error(err);
-        alert('ไม่สามารถเชื่อมต่อ Webhook ได้');
-      }
-    });
-  </script>
+    <script>
+        // ใส่ LIFF ID ของคุณที่นี่
+        const LIFF_ID = 'YOUR_LIFF_ID_HERE';
+        
+        // ใส่ Make.com Webhook URL ของคุณที่นี่ (Scenario 3)
+        const WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
+        
+        let lineUserId = '';
+        let displayName = '';
+        
+        // ตั้งค่าวันที่ขั้นต่ำเป็นวันนี้
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bookingDate').min = today;
+        
+        // ฟังก์ชันขยาย/ย่อบริการ
+        function toggleService(serviceName) {
+            const content = document.getElementById(serviceName + '-content');
+            const item = document.querySelector(`[data-service="${serviceName}"]`);
+            const header = item.querySelector('.service-header');
+            const arrow = header.querySelector('.service-arrow');
+            
+            // ปิดทุก accordion ที่เปิดอยู่
+            document.querySelectorAll('.service-content').forEach(el => {
+                if (el.id !== serviceName + '-content') {
+                    el.classList.remove('open');
+                }
+            });
+            document.querySelectorAll('.service-item').forEach(el => {
+                if (el.dataset.service !== serviceName) {
+                    el.classList.remove('active');
+                }
+            });
+            document.querySelectorAll('.service-header').forEach(el => {
+                if (el !== header) {
+                    el.classList.remove('active');
+                }
+            });
+            document.querySelectorAll('.service-arrow').forEach(el => {
+                if (el !== arrow) {
+                    el.classList.remove('rotated');
+                }
+            });
+            
+            // Toggle accordion ปัจจุบัน
+            content.classList.toggle('open');
+            item.classList.toggle('active');
+            header.classList.toggle('active');
+            arrow.classList.toggle('rotated');
+        }
+        
+        // คำนวณราคารวม
+        function calculateTotal() {
+            let total = 0;
+            
+            // บริการแบบเลือกขนาด (อาบน้ำ, ตัดขน)
+            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                total += parseInt(radio.dataset.price);
+            });
+            
+            // บริการทั่วไป
+            document.querySelectorAll('input[name="simple-services"]:checked').forEach(checkbox => {
+                total += parseInt(checkbox.dataset.price);
+            });
+            
+            document.getElementById('totalPrice').textContent = `ยอดรวม: ${total.toLocaleString()} บาท`;
+        }
+        
+        // เพิ่ม event listener ให้ทุก input
+        document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+            input.addEventListener('change', calculateTotal);
+        });
+        
+        // เริ่มต้น LIFF
+        window.onload = function() {
+            liff.init({
+                liffId: LIFF_ID
+            }).then(() => {
+                if (liff.isLoggedIn()) {
+                    liff.getProfile().then(profile => {
+                        lineUserId = profile.userId;
+                        displayName = profile.displayName;
+                        document.getElementById('customerName').textContent = displayName;
+                        document.getElementById('petName').textContent = 'น้องหมา';
+                    }).catch(err => {
+                        console.error('Error getting profile:', err);
+                    });
+                } else {
+                    liff.login();
+                }
+            }).catch(err => {
+                console.error('LIFF init failed:', err);
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง');
+            });
+        };
+        
+        // จัดการฟอร์ม
+        document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // รวบรวมบริการที่เลือก
+            const selectedServices = [];
+            let totalPrice = 0;
+            
+            // บริการแบบเลือกขนาด
+            document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+                selectedServices.push(radio.value);
+                totalPrice += parseInt(radio.dataset.price);
+            });
+            
+            // บริการทั่วไป
+            document.querySelectorAll('input[name="simple-services"]:checked').forEach(checkbox => {
+                selectedServices.push(checkbox.value);
+                totalPrice += parseInt(checkbox.dataset.price);
+            });
+            
+            if (selectedServices.length === 0) {
+                alert('กรุณาเลือกบริการอย่างน้อย 1 รายการ');
+                return;
+            }
+            
+            // แสดง Loading
+            document.getElementById('bookingForm').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            
+            // เก็บข้อมูล
+            const formData = {
+                line_user_id: lineUserId,
+                line_display_name: displayName,
+                customer_name: document.getElementById('customerName').textContent,
+                pet_name: document.getElementById('petName').textContent,
+                booking_date: document.getElementById('bookingDate').value,
+                booking_time: document.getElementById('bookingTime').value,
+                services: selectedServices.join(', '),
+                total_price: totalPrice,
+                status: 'confirmed',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('loading').classList.remove('active');
+                    document.getElementById('bookingDetails').innerHTML = `
+                        <strong>วันที่:</strong> ${formData.booking_date}<br>
+                        <strong>เวลา:</strong> ${formData.booking_time}<br>
+                        <strong>บริการ:</strong> ${formData.services}<br>
+                        <strong>ยอดรวม:</strong> ${formData.total_price.toLocaleString()} บาท
+                    `;
+                    document.getElementById('successMessage').classList.add('active');
+                    
+                    setTimeout(() => {
+                        liff.closeWindow();
+                    }, 3000);
+                } else {
+                    throw new Error('Failed to submit');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('bookingForm').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>
