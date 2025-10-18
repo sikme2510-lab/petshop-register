@@ -1,21 +1,309 @@
-const LIFF_ID = '2008313526-M78JQBe6'; // ได้จาก LINE Login Channel
-   const WEBHOOK_URL = 'https://hook.eu2.make.com/1leu3n0sl8bw7xd8cxgubfaqdjgifg87';
-```
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สมัครสมาชิก Pet Grooming</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .pet-size {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .size-option {
+            position: relative;
+        }
+        
+        .size-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .size-label {
+            display: block;
+            padding: 12px 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .size-option input[type="radio"]:checked + .size-label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .success-message.active {
+            display: block;
+        }
+        
+        .success-message h2 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐾 สมัครสมาชิก</h1>
+            <p>Pet Grooming Shop</p>
+        </div>
+        
+        <form id="registrationForm">
+            <div class="form-group">
+                <label>ชื่อ-นามสกุล *</label>
+                <input type="text" id="customerName" required placeholder="เช่น สมชาย ใจดี">
+            </div>
+            
+            <div class="form-group">
+                <label>เบอร์โทรศัพท์ *</label>
+                <input type="tel" id="phone" required placeholder="เช่น 0812345678" pattern="[0-9]{10}">
+            </div>
+            
+            <div class="form-group">
+                <label>ชื่อสัตว์เลี้ยง *</label>
+                <input type="text" id="petName" required placeholder="เช่น ปอมปอม">
+            </div>
+            
+            <div class="form-group">
+                <label>สายพันธุ์ *</label>
+                <input type="text" id="petBreed" required placeholder="เช่น ปอมเมอเรเนียน">
+            </div>
+            
+            <div class="form-group">
+                <label>ขนาดสัตว์เลี้ยง *</label>
+                <div class="pet-size">
+                    <div class="size-option">
+                        <input type="radio" id="sizeS" name="petSize" value="S" required>
+                        <label for="sizeS" class="size-label">S</label>
+                    </div>
+                    <div class="size-option">
+                        <input type="radio" id="sizeM" name="petSize" value="M">
+                        <label for="sizeM" class="size-label">M</label>
+                    </div>
+                    <div class="size-option">
+                        <input type="radio" id="sizeL" name="petSize" value="L">
+                        <label for="sizeL" class="size-label">L</label>
+                    </div>
+                    <div class="size-option">
+                        <input type="radio" id="sizeXL" name="petSize" value="XL">
+                        <label for="sizeXL" class="size-label">XL</label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">สมัครสมาชิก</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="icon">⏳</div>
+            <h3>กำลังบันทึกข้อมูล...</h3>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <div class="icon">✅</div>
+            <h2>สมัครสมาชิกสำเร็จ!</h2>
+            <p>ขอบคุณที่เป็นสมาชิกกับเรา</p>
+        </div>
+    </div>
 
-5. กด **"Commit changes"** (สีเขียว)
-
-### **ขั้นตอนที่ 3: เปิด GitHub Pages**
-
-1. ไปที่ **Settings** (แท็บบนขวา)
-
-2. เลื่อนซ้าย เลือก **"Pages"**
-
-3. ที่ **Source** → เลือก **"main"** branch
-
-4. กด **"Save"**
-
-5. รอ 1-2 นาที แล้ว **Refresh หน้า**
-
-6. จะเห็นข้อความ: 
-```
-   Your site is live at https://yourusername.github.io/petshop-register/
+    <script>
+        // ใส่ LIFF ID ของคุณที่นี่
+        const LIFF_ID = '2008313526-M78JQBe6';
+        
+        // ใส่ Make.com Webhook URL ของคุณที่นี่
+        const WEBHOOK_URL = 'https://hook.eu2.make.com/1leu3n0sl8bw7xd8cxgubfaqdjgifg87';
+        
+        let lineUserId = '';
+        let displayName = '';
+        
+        // เริ่มต้น LIFF
+        window.onload = function() {
+            liff.init({
+                liffId: LIFF_ID
+            }).then(() => {
+                if (liff.isLoggedIn()) {
+                    liff.getProfile().then(profile => {
+                        lineUserId = profile.userId;
+                        displayName = profile.displayName;
+                    }).catch(err => {
+                        console.error('Error getting profile:', err);
+                    });
+                } else {
+                    liff.login();
+                }
+            }).catch(err => {
+                console.error('LIFF init failed:', err);
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            });
+        };
+        
+        // จัดการฟอร์ม
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            
+            const formData = {
+                line_user_id: lineUserId,
+                line_display_name: displayName,
+                customer_name: document.getElementById('customerName').value,
+                phone: document.getElementById('phone').value,
+                pet_name: document.getElementById('petName').value,
+                pet_breed: document.getElementById('petBreed').value,
+                pet_size: document.querySelector('input[name="petSize"]:checked').value,
+                created_date: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('loading').classList.remove('active');
+                    document.getElementById('successMessage').classList.add('active');
+                    
+                    setTimeout(() => {
+                        liff.closeWindow();
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to submit');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('registrationForm').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
